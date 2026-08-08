@@ -46,21 +46,10 @@ public class CheckoutController {
             );
         }
 
-        var order = new Order();
-        order.setTotalPrice(cart.getTotalPrice());
-        order.setStatus(OrderStatus.PENDING);
-        order.setCustomer(authService.getCurrentUser());
+        var order = Order.fromCart(cart, authService.getCurrentUser());
 
-        cart.getCartItems().forEach(item -> {
-            var orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(item.getProduct());
-            orderItem.setQuantity(item.getQuantity());
-            orderItem.setTotalPrice(item.getTotalPrice());
-            orderItem.setUnitPrice(item.getProduct().getPrice());
-            order.getItems().add(orderItem);
-        });
         orderRepository.save(order);
+
         cartService.clearCart(request.getCartId());
 
         return ResponseEntity.ok(new CheckoutResponse(order.getId()));
